@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2010
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSWindowsHook", "CSWindowsHook\CSWindowsHook.csproj", "{7F438526-8F77-455D-B128-B1C97D514092}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Heep", "Heep\Heep.csproj", "{17CCAD1C-12EA-424D-83E4-970A7C3CBBA8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7F438526-8F77-455D-B128-B1C97D514092}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7F438526-8F77-455D-B128-B1C97D514092}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7F438526-8F77-455D-B128-B1C97D514092}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7F438526-8F77-455D-B128-B1C97D514092}.Release|Any CPU.Build.0 = Release|Any CPU
+		{17CCAD1C-12EA-424D-83E4-970A7C3CBBA8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{17CCAD1C-12EA-424D-83E4-970A7C3CBBA8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{17CCAD1C-12EA-424D-83E4-970A7C3CBBA8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{17CCAD1C-12EA-424D-83E4-970A7C3CBBA8}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E2D0207F-1E8F-4D57-899E-1C0ABB677065}
+	EndGlobalSection
+EndGlobal
