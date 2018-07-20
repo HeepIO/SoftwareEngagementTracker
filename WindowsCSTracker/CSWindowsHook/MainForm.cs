@@ -31,6 +31,7 @@ using System.Threading;
 using System.Reflection;
 using System.Diagnostics;
 using Heep;
+using System.Timers;
 #endregion
 
 
@@ -38,7 +39,9 @@ namespace CSWindowsHook
 {
     public partial class MainForm : Form
     {
-        HeepDevice myDevice;
+        private static DateTime startEngagement;
+        private static HeepDevice myDevice;
+        private static double allowableDownTime = 60;
 
         public MainForm()
         {
@@ -58,6 +61,37 @@ namespace CSWindowsHook
             myDevice.StartListening();
 
             InitializeComponent();
+
+            System.Timers.Timer aTimer = new System.Timers.Timer();
+            aTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
+            aTimer.Interval = 5000;
+            aTimer.Enabled = true;
+        }
+
+        // Specify what you want to happen when the Elapsed event is raised.
+        private static void OnTimedEvent(object source, ElapsedEventArgs e)
+        {
+            DateTime curTime = DateTime.Now;
+            double totalSecondsBetween = ((curTime - startEngagement).TotalSeconds);
+
+            if(totalSecondsBetween < allowableDownTime)
+            {
+                Console.WriteLine("Is Engaged " + totalSecondsBetween);
+                if (myDevice.GetControlValueByID(0) == 0)
+                {
+                    myDevice.SetControlByID(0, 1);
+                }
+            }
+            else
+            {
+                Console.WriteLine("Not Engaged " + totalSecondsBetween);
+                if (myDevice.GetControlValueByID(0) == 1)
+                {
+                    myDevice.SetControlByID(0, 0);
+                }
+            }
+
+            
         }
 
         private const int WM_KEYDOWN = 0x100;
@@ -231,6 +265,8 @@ namespace CSWindowsHook
                 String log = String.Format("X = {0} Y = {1}  ({2})\r\n",
                     mouseLLHookStruct.pt.x, mouseLLHookStruct.pt.y, wmMouse);
                 this.tbLog.AppendText(log);
+
+                startEngagement = DateTime.Now;
             }
 
             // Pass the hook information to the next hook procedure in chain
@@ -417,8 +453,11 @@ namespace CSWindowsHook
                     vkCode, wmKeyboard);
                 this.tbLog.AppendText(log);
 
-                if((int)wmKeyboard == WM_KEYDOWN)
-                    myDevice.SetControlByID(0, myDevice.GetControlValueByID(0) == 0 ? 1 : 0);
+                startEngagement = DateTime.Now;
+               
+
+                //if ((int)wmKeyboard == WM_KEYDOWN)
+                //    myDevice.SetControlByID(0, myDevice.GetControlValueByID(0) == 0 ? 1 : 0);
             }
 
             // Pass the hook information to the next hook procedure in chain

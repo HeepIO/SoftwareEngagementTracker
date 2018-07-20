@@ -85,10 +85,17 @@ namespace Heep
 		public static void SendAnalytics(DeviceID deviceID, List<byte> memoryDump)
 		{
 			List<byte> deviceIDList = deviceID.GetIDArray ();
-			string base64deviceID = Convert.ToBase64String(deviceIDList.ToArray());
 
-			//Debug.Log ("Saving Analytics for " + base64deviceID);
-			string url = "https://heep-3cddb.firebaseio.com/analytics/" + base64deviceID + ".json";
+            StringBuilder hex = new StringBuilder(deviceIDList.Count * 2);
+            foreach (byte b in deviceIDList)
+                hex.AppendFormat("{0:x2}", b);
+
+            //string base64deviceID = Convert.ToBase64String(deviceIDList.ToArray());
+            string deviceIDString = hex.ToString();
+            
+
+            //Debug.Log ("Saving Analytics for " + base64deviceID);
+            string url = "https://heep-3cddb.firebaseio.com/analytics/" + deviceIDString + ".json";
 
 			string base64 = Convert.ToBase64String(memoryDump.ToArray());
 			string data = "\""+ base64 + "\"";
