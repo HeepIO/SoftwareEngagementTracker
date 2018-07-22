@@ -73,7 +73,7 @@ namespace Heep
 				HeepLanguage.AddBufferToBuffer (deviceMemory, analyticsBuffer);
                 NonVolatileData.WriteMemoryToFile(deviceMemory);
 
-                //HeepCommunications.SendAnalytics (myID, deviceMemory);
+                HeepCommunications.SendAnalytics (myID, deviceMemory);
 
             }
 		}

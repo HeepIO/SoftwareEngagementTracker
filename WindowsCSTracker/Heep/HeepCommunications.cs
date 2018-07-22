@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Security.Cryptography.X509Certificates;
 using System.Net.Security;
+using Google.Cloud.Firestore;
 
 namespace Heep
 {
@@ -82,7 +83,7 @@ namespace Heep
 			return retBuffer;
 		}
 
-		public static void SendAnalytics(DeviceID deviceID, List<byte> memoryDump)
+		public static async void SendAnalytics(DeviceID deviceID, List<byte> memoryDump)
 		{
 			List<byte> deviceIDList = deviceID.GetIDArray ();
 
@@ -92,18 +93,26 @@ namespace Heep
 
             //string base64deviceID = Convert.ToBase64String(deviceIDList.ToArray());
             string deviceIDString = hex.ToString();
-            
 
-            //Debug.Log ("Saving Analytics for " + base64deviceID);
-            string url = "https://heep-3cddb.firebaseio.com/analytics/" + deviceIDString + ".json";
+            string project = "heep-3cddb";
+            FirestoreDb db = FirestoreDb.Create(project);
+            Console.WriteLine("Created Cloud Firestore client with project ID: {0}", project);
+            Dictionary<string, object> user = new Dictionary<string, object>
+            {
+                { "Name", "Engagement Keys" }
+            };
+            WriteResult writeResult = await db.Collection("DeviceList").Document(deviceIDString).SetAsync(user);
 
-			string base64 = Convert.ToBase64String(memoryDump.ToArray());
-			string data = "\""+ base64 + "\"";
 
-			POST(url, data);
-		}
+            Dictionary<string, object> DataDictionary = new Dictionary<string, object>
+            {
+                { "Data", memoryDump.ToArray() }
+            };
+            await db.Collection("DeviceList").Document(deviceIDString).Collection("Analytics").AddAsync(DataDictionary);
 
-		static void POST(string url, string jsonContent) 
+        }
+
+        static void POST(string url, string jsonContent) 
 		{
 			HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
 			request.Method = "PUT";
