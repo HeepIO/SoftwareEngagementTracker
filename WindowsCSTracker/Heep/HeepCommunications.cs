@@ -96,17 +96,34 @@ namespace Heep
             return deviceIDString;
         }
 
-        public static async void SendDeviceContext(DeviceID deviceID)
+        public static async void SendDeviceContext(HeepDevice theDevice)
         {
-            string deviceIDString = GetDeviceIDString(deviceID);
+            string deviceIDString = GetDeviceIDString(theDevice.GetDeviceID());
             string project = "heep-3cddb";
             FirestoreDb db = FirestoreDb.Create(project);
             Console.WriteLine("Created Cloud Firestore client with project ID: {0}", project);
             Dictionary<string, object> user = new Dictionary<string, object>
             {
-                { "Name", "Engagement Keys" }
+                { "Name", "Engagement Keys" },
             };
             WriteResult writeResult = await db.Collection("DeviceList").Document(deviceIDString).SetAsync(user);
+
+            for(int i = 0; i < theDevice.GetControlList().Count; i++)
+            {
+                Control currentControl = theDevice.GetControlList()[i];
+                Dictionary<string, object> controlDoc = new Dictionary<string, object>
+                {
+                    { "Name", currentControl.GetName() },
+                    { "ID", currentControl.GetID() },
+                    { "Type", (int)currentControl.GetControlType() },
+                    { "Direction", (int)currentControl.GetControlDirection() },
+                    { "HighValue", currentControl.GetHighValue() },
+                    { "LowValue", currentControl.GetLowValue() } 
+                };
+
+                string controlDocName = "Control" + i;
+                WriteResult controlResult = await db.Collection("DeviceList").Document(deviceIDString).Collection("Controls").Document(controlDocName).SetAsync(controlDoc);
+            }
         }
 
 		public static async void SendAnalytics(DeviceID deviceID, List<byte> memoryDump)

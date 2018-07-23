@@ -28,6 +28,7 @@ namespace Heep
 
 		public void StartListening()
 		{
+            HeepCommunications.SendDeviceContext(this);
 			HeepCommunications.StartHeepServer (this, interruptServer);
 		}	
 
@@ -35,6 +36,11 @@ namespace Heep
 		{
 			interruptServer.Close ();
 		}
+
+        public List<Control> GetControlList()
+        {
+            return controls;
+        }
 
 		public int GetFirmwareVersion()
 		{
