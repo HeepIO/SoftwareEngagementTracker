@@ -102,9 +102,11 @@ namespace Heep
             string project = "heep-3cddb";
             FirestoreDb db = FirestoreDb.Create(project);
             Console.WriteLine("Created Cloud Firestore client with project ID: {0}", project);
+
+            string name = theDevice.GetDeviceName();
             Dictionary<string, object> user = new Dictionary<string, object>
             {
-                { "Name", "Engagement Keys" },
+                { "Name", name },
             };
             WriteResult writeResult = await db.Collection("DeviceList").Document(deviceIDString).SetAsync(user);
 

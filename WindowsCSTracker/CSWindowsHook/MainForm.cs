@@ -57,7 +57,7 @@ namespace CSWindowsHook
 
             myDevice.AddControl(Heep.Control.CreateControl(Heep.Control.CtrlInputOutput.input, Heep.Control.CtrlType.OnOff, "Key Up", true));
 
-            myDevice.SetDeviceNameStartup("Engagement Keys");
+            myDevice.SetDeviceNameStartup("Engagement Key 1");
             myDevice.StartListening();
 
             InitializeComponent();

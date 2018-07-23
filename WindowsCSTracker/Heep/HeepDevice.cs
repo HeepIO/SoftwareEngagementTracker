@@ -191,6 +191,11 @@ namespace Heep
 			}
 		}
 
+        public string GetDeviceName()
+        {
+            return HeepParser.GetNameFromBuffer(deviceMemory);
+        }
+
 		public void SetDeviceName(String name)
 		{
 			HeepLanguage.AddNameToMemory (deviceMemory, myID, name);
