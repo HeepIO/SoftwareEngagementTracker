@@ -83,19 +83,22 @@ namespace Heep
 			return retBuffer;
 		}
 
-		public static async void SendAnalytics(DeviceID deviceID, List<byte> memoryDump)
-		{
-			List<byte> deviceIDList = deviceID.GetIDArray ();
+        public static string GetDeviceIDString(DeviceID deviceID)
+        {
+            List<byte> deviceIDList = deviceID.GetIDArray();
 
             StringBuilder hex = new StringBuilder(deviceIDList.Count * 2);
             foreach (byte b in deviceIDList)
                 hex.AppendFormat("{0:x2}", b);
 
-            //string base64deviceID = Convert.ToBase64String(deviceIDList.ToArray());
             string deviceIDString = hex.ToString();
 
-            string analyticsString = HeepParser.GetAnalyticsStringFromMemory(memoryDump);
+            return deviceIDString;
+        }
 
+        public static async void SendDeviceContext(DeviceID deviceID)
+        {
+            string deviceIDString = GetDeviceIDString(deviceID);
             string project = "heep-3cddb";
             FirestoreDb db = FirestoreDb.Create(project);
             Console.WriteLine("Created Cloud Firestore client with project ID: {0}", project);
@@ -104,11 +107,19 @@ namespace Heep
                 { "Name", "Engagement Keys" }
             };
             WriteResult writeResult = await db.Collection("DeviceList").Document(deviceIDString).SetAsync(user);
+        }
 
-            
-            
-            if(analyticsString.Length > 0)
+		public static async void SendAnalytics(DeviceID deviceID, List<byte> memoryDump)
+		{
+            string deviceIDString = GetDeviceIDString(deviceID);
+
+            string analyticsString = HeepParser.GetAnalyticsStringFromMemory(memoryDump);
+
+            if (analyticsString.Length > 0)
             {
+                string project = "heep-3cddb";
+                FirestoreDb db = FirestoreDb.Create(project);
+
                 Dictionary<string, object> DataDictionary = new Dictionary<string, object>
                 {
                     { "Data", analyticsString}
