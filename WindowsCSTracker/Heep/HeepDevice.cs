@@ -28,6 +28,7 @@ namespace Heep
 
 		public void StartListening()
 		{
+            HeepCommunications.SendDeviceContext(this);
 			HeepCommunications.StartHeepServer (this, interruptServer);
 		}	
 
@@ -35,6 +36,11 @@ namespace Heep
 		{
 			interruptServer.Close ();
 		}
+
+        public List<Control> GetControlList()
+        {
+            return controls;
+        }
 
 		public int GetFirmwareVersion()
 		{
@@ -73,7 +79,7 @@ namespace Heep
 				HeepLanguage.AddBufferToBuffer (deviceMemory, analyticsBuffer);
                 NonVolatileData.WriteMemoryToFile(deviceMemory);
 
-                //HeepCommunications.SendAnalytics (myID, deviceMemory);
+                HeepCommunications.SendAnalytics (myID, deviceMemory);
 
             }
 		}
@@ -184,6 +190,11 @@ namespace Heep
 				SetDeviceName (name);
 			}
 		}
+
+        public string GetDeviceName()
+        {
+            return HeepParser.GetNameFromBuffer(deviceMemory);
+        }
 
 		public void SetDeviceName(String name)
 		{

@@ -32,6 +32,7 @@ using System.Reflection;
 using System.Diagnostics;
 using Heep;
 using System.Timers;
+using System.Xml;
 #endregion
 
 
@@ -43,13 +44,70 @@ namespace CSWindowsHook
         private static HeepDevice myDevice;
         private static double allowableDownTime = 60;
 
+        public static void CreateTemplateXML()
+        {
+            XmlTextWriter textWriter = new XmlTextWriter("TrackerSettings.xml", null);
+            textWriter.WriteStartDocument();
+
+            // Write first element  
+            textWriter.WriteStartElement("UtilizationTracker");
+            // Write next element  
+            textWriter.WriteStartElement("Name", "");
+            textWriter.WriteString("Eng Keys");
+            textWriter.WriteEndElement();
+            // Write one more element  
+            textWriter.WriteStartElement("DeviceID", "");
+            textWriter.WriteValue(0x0E32F232);
+            textWriter.WriteEndElement();
+
+            textWriter.WriteStartElement("SamplePeriod", "");
+            textWriter.WriteValue(60);
+            textWriter.WriteEndElement();
+     
+            // Ends the document.  
+            textWriter.WriteEndDocument();
+            // close writer  
+            textWriter.Close();
+        }
+
         public MainForm()
         {
+            //CreateTemplateXML();
+
+            long readInDeviceID = 0;
+            string deviceName = "";
+            XmlTextReader textReader = new XmlTextReader("TrackerSettings.xml");
+            while(textReader.Read())
+            {
+                switch (textReader.NodeType)
+                {
+                    case XmlNodeType.Element: // The node is an element.
+                        if(textReader.Name == "Name")
+                        {
+                            textReader.Read();
+                            deviceName = textReader.Value;
+                        }
+                        else if(textReader.Name == "SamplePeriod")
+                        {
+                            textReader.Read();
+                            allowableDownTime = Double.Parse(textReader.Value);
+                        }
+                        else if(textReader.Name == "DeviceID")
+                        {
+                            textReader.Read();
+                            readInDeviceID = long.Parse(textReader.Value);
+                        }
+
+                        Console.Write("<" + textReader.Name);
+                        Console.WriteLine(">");
+                        break;
+                }
+            }
+
             List<byte> ID = new List<byte>();
             for (byte i = 0; i < 4; i++)
             {
-                byte multiplier = 14;
-                ID.Add((byte)(i * multiplier));
+                ID.Add((byte)(readInDeviceID >> 3*8 - i*8 & 0xFF));
             }
 
             DeviceID myID = new DeviceID(ID);
@@ -57,7 +115,7 @@ namespace CSWindowsHook
 
             myDevice.AddControl(Heep.Control.CreateControl(Heep.Control.CtrlInputOutput.input, Heep.Control.CtrlType.OnOff, "Key Up", true));
 
-            myDevice.SetDeviceNameStartup("Engagement Keys");
+            myDevice.SetDeviceNameStartup(deviceName);
             myDevice.StartListening();
 
             InitializeComponent();

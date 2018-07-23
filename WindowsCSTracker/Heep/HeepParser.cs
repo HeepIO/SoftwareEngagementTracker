@@ -66,6 +66,31 @@ namespace Heep
 			return vertexList;
 		}
 
+        public static string GetNameFromBuffer(List <byte> buffer)
+        {
+            string name = "";
+            int counter = 0;
+
+            while (counter < buffer.Count)
+            {
+
+                byte nextMOP = buffer[counter];
+                counter += 1;
+
+                MOPHeader header = UnwrapMOPHeader(buffer, ref counter);
+
+                if (nextMOP == HeepLanguage.DeviceNameOpCode)
+                {
+                    for (int i = 0; i < header.numBytes; i++)
+                        name += (char)buffer[i + counter];
+                }
+
+                counter += header.numBytes;
+            }
+
+            return name;
+        }
+
 		public static bool DeviceNameOpCodeAlreadySet(List <byte> buffer)
 		{
 			int counter = 0;
@@ -128,6 +153,35 @@ namespace Heep
 			
 			}
 		}
+
+        public static string GetAnalyticsStringFromMemory(List <byte> AnalyticsContainingBuffer)
+        {
+            List<byte> AnalyticsBuffer = new List<byte>();
+            int counter = 0;
+
+            while (counter < AnalyticsContainingBuffer.Count)
+            {
+                int startCounter = counter;
+                byte nextMOP = AnalyticsContainingBuffer[counter];
+                counter += 1;
+
+                MOPHeader header = UnwrapMOPHeader(AnalyticsContainingBuffer, ref counter);
+                
+                if (nextMOP == HeepLanguage.AnalyticsData)
+                {
+                    for (int i = 0; i < header.numBytes+6; i++)
+                    {
+                        AnalyticsBuffer.Add(AnalyticsContainingBuffer[i + startCounter]);
+                    }
+
+                    AnalyticsContainingBuffer[startCounter] = HeepLanguage.FragmentOpCode;
+                }
+
+                counter += header.numBytes;
+            }
+
+            return System.Text.Encoding.Default.GetString(AnalyticsBuffer.ToArray());
+        }
 
 		public static MOPHeader UnwrapMOPHeader(List <byte> buffer, ref int counter)
 		{

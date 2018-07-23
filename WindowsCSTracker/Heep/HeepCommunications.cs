@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Security.Cryptography.X509Certificates;
 using System.Net.Security;
+using Google.Cloud.Firestore;
 
 namespace Heep
 {
@@ -82,28 +83,71 @@ namespace Heep
 			return retBuffer;
 		}
 
-		public static void SendAnalytics(DeviceID deviceID, List<byte> memoryDump)
-		{
-			List<byte> deviceIDList = deviceID.GetIDArray ();
+        public static string GetDeviceIDString(DeviceID deviceID)
+        {
+            List<byte> deviceIDList = deviceID.GetIDArray();
 
             StringBuilder hex = new StringBuilder(deviceIDList.Count * 2);
             foreach (byte b in deviceIDList)
                 hex.AppendFormat("{0:x2}", b);
 
-            //string base64deviceID = Convert.ToBase64String(deviceIDList.ToArray());
             string deviceIDString = hex.ToString();
-            
 
-            //Debug.Log ("Saving Analytics for " + base64deviceID);
-            string url = "https://heep-3cddb.firebaseio.com/analytics/" + deviceIDString + ".json";
+            return deviceIDString;
+        }
 
-			string base64 = Convert.ToBase64String(memoryDump.ToArray());
-			string data = "\""+ base64 + "\"";
+        public static async void SendDeviceContext(HeepDevice theDevice)
+        {
+            string deviceIDString = GetDeviceIDString(theDevice.GetDeviceID());
+            string project = "heep-3cddb";
+            FirestoreDb db = FirestoreDb.Create(project);
+            Console.WriteLine("Created Cloud Firestore client with project ID: {0}", project);
 
-			POST(url, data);
-		}
+            string name = theDevice.GetDeviceName();
+            Dictionary<string, object> user = new Dictionary<string, object>
+            {
+                { "Name", name },
+            };
+            WriteResult writeResult = await db.Collection("DeviceList").Document(deviceIDString).SetAsync(user);
 
-		static void POST(string url, string jsonContent) 
+            for(int i = 0; i < theDevice.GetControlList().Count; i++)
+            {
+                Control currentControl = theDevice.GetControlList()[i];
+                Dictionary<string, object> controlDoc = new Dictionary<string, object>
+                {
+                    { "Name", currentControl.GetName() },
+                    { "ID", currentControl.GetID() },
+                    { "Type", (int)currentControl.GetControlType() },
+                    { "Direction", (int)currentControl.GetControlDirection() },
+                    { "HighValue", currentControl.GetHighValue() },
+                    { "LowValue", currentControl.GetLowValue() } 
+                };
+
+                string controlDocName = "Control" + i;
+                WriteResult controlResult = await db.Collection("DeviceList").Document(deviceIDString).Collection("Controls").Document(controlDocName).SetAsync(controlDoc);
+            }
+        }
+
+		public static async void SendAnalytics(DeviceID deviceID, List<byte> memoryDump)
+		{
+            string deviceIDString = GetDeviceIDString(deviceID);
+
+            string analyticsString = HeepParser.GetAnalyticsStringFromMemory(memoryDump);
+
+            if (analyticsString.Length > 0)
+            {
+                string project = "heep-3cddb";
+                FirestoreDb db = FirestoreDb.Create(project);
+
+                Dictionary<string, object> DataDictionary = new Dictionary<string, object>
+                {
+                    { "Data", analyticsString}
+                };
+                await db.Collection("DeviceList").Document(deviceIDString).Collection("Analytics").AddAsync(DataDictionary);
+            }
+        }
+
+        static void POST(string url, string jsonContent) 
 		{
 			HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
 			request.Method = "PUT";
