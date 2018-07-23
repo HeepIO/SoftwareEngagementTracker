@@ -74,6 +74,7 @@ namespace CSWindowsHook
         {
             //CreateTemplateXML();
 
+            long readInDeviceID = 0;
             string deviceName = "";
             XmlTextReader textReader = new XmlTextReader("TrackerSettings.xml");
             while(textReader.Read())
@@ -91,6 +92,11 @@ namespace CSWindowsHook
                             textReader.Read();
                             allowableDownTime = Double.Parse(textReader.Value);
                         }
+                        else if(textReader.Name == "DeviceID")
+                        {
+                            textReader.Read();
+                            readInDeviceID = long.Parse(textReader.Value);
+                        }
 
                         Console.Write("<" + textReader.Name);
                         Console.WriteLine(">");
@@ -101,8 +107,7 @@ namespace CSWindowsHook
             List<byte> ID = new List<byte>();
             for (byte i = 0; i < 4; i++)
             {
-                byte multiplier = 14;
-                ID.Add((byte)(i * multiplier));
+                ID.Add((byte)(readInDeviceID >> 3*8 - i*8 & 0xFF));
             }
 
             DeviceID myID = new DeviceID(ID);
