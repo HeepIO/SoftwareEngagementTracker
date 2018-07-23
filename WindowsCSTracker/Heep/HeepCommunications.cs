@@ -94,6 +94,8 @@ namespace Heep
             //string base64deviceID = Convert.ToBase64String(deviceIDList.ToArray());
             string deviceIDString = hex.ToString();
 
+            string analyticsString = HeepParser.GetAnalyticsStringFromMemory(memoryDump);
+
             string project = "heep-3cddb";
             FirestoreDb db = FirestoreDb.Create(project);
             Console.WriteLine("Created Cloud Firestore client with project ID: {0}", project);
@@ -103,14 +105,16 @@ namespace Heep
             };
             WriteResult writeResult = await db.Collection("DeviceList").Document(deviceIDString).SetAsync(user);
 
-
-            string MemoryData = System.Text.Encoding.Default.GetString(memoryDump.ToArray());
-            Dictionary<string, object> DataDictionary = new Dictionary<string, object>
+            
+            
+            if(analyticsString.Length > 0)
             {
-                { "Data", MemoryData}
-            };
-            await db.Collection("DeviceList").Document(deviceIDString).Collection("Analytics").AddAsync(DataDictionary);
-
+                Dictionary<string, object> DataDictionary = new Dictionary<string, object>
+                {
+                    { "Data", analyticsString}
+                };
+                await db.Collection("DeviceList").Document(deviceIDString).Collection("Analytics").AddAsync(DataDictionary);
+            }
         }
 
         static void POST(string url, string jsonContent) 
