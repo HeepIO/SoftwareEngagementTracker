@@ -104,9 +104,10 @@ namespace Heep
             WriteResult writeResult = await db.Collection("DeviceList").Document(deviceIDString).SetAsync(user);
 
 
+            string MemoryData = System.Text.Encoding.Default.GetString(memoryDump.ToArray());
             Dictionary<string, object> DataDictionary = new Dictionary<string, object>
             {
-                { "Data", memoryDump.ToArray() }
+                { "Data", MemoryData}
             };
             await db.Collection("DeviceList").Document(deviceIDString).Collection("Analytics").AddAsync(DataDictionary);
 
