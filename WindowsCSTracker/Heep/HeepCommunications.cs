@@ -133,6 +133,7 @@ namespace Heep
             string deviceIDString = GetDeviceIDString(deviceID);
 
             string analyticsString = HeepParser.GetAnalyticsStringFromMemory(memoryDump);
+            
 
             if (analyticsString.Length > 0)
             {
