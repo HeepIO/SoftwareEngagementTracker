@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Net;  
+using System.Net;
+using System.Text;
 using System.Threading;
 
 namespace Heep
@@ -180,7 +181,14 @@ namespace Heep
                 counter += header.numBytes;
             }
 
-            return System.Text.Encoding.Default.GetString(AnalyticsBuffer.ToArray());
+            return Convert.ToBase64String(AnalyticsBuffer.ToArray());
+
+            //char[] chars = new char[AnalyticsBuffer.Count / sizeof(char)];
+            //System.Buffer.BlockCopy(AnalyticsBuffer.ToArray(), 0, chars, 0, AnalyticsBuffer.Count);
+            //return new string(chars);
+
+            //return Encoding.UTF8.GetString(AnalyticsBuffer.ToArray(), 0, AnalyticsBuffer.Count);
+            //return System.Text.Encoding.ASCII.GetString(AnalyticsBuffer.ToArray());
         }
 
 		public static MOPHeader UnwrapMOPHeader(List <byte> buffer, ref int counter)
